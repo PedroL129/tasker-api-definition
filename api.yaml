@@ -1,0 +1,47 @@
+openapi: 3.0.1
+info:
+  title: Tasker
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+- url: http://localhost:8080/v0
+tags:
+- name: board
+paths:
+  /board:
+    get:
+      tags:
+        - board
+      summary: Get all existing board
+      operationId: findBoards
+      parameters: 
+        - name: name
+          in: query
+          description: name of the board to filter
+          required: false
+          schema:
+            type: string
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Board'
+        400:
+          description: Invalid status value
+          content: {} 
+components:
+  schemas:
+    Board:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+        name:
+          type: string
