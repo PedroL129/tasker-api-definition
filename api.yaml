@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.0.3
 info:
   title: Tasker
   license:
@@ -9,13 +9,15 @@ servers:
 - url: http://localhost:8080/v0
 tags:
 - name: board
+- name: column
+- name: task
 paths:
-  /board:
+  /boards:
     get:
       tags:
         - board
       summary: Get all existing board
-      operationId: findBoards
+      operationId: getBoards
       parameters: 
         - name: name
           in: query
@@ -35,9 +37,159 @@ paths:
         400:
           description: Invalid status value
           content: {} 
+    post:
+      tags: 
+        - board
+      summary: Create a board
+      operationId: createBoard
+      requestBody:
+        description: Board object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BoardCreate'
+      responses:
+        201:
+          description: Board created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        400:
+          description: Bad request
+          content:
+            {}
+  /boards/{boardId}:
+    get:
+      tags: 
+        - board
+      summary: Get a board by Id
+      operationId: getBoardById
+      parameters:
+        - $ref: '#/components/parameters/BoardIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Board not found
+          content: {}
+    put:
+      tags:
+        - board
+      summary: Update a board
+      operationId: updateBoard
+      parameters: 
+        - $ref: '#/components/parameters/BoardIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Board not found
+          content: {}
+    delete:
+      tags:
+        - board
+      summary: Delete a board
+      operationId: deleteBoard
+      parameters: 
+        - $ref: '#/components/parameters/BoardIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Board'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Board not found
+          content: {}
 components:
+  parameters:
+    BoardIdParam:
+      name: boardId
+      in: path
+      description: id of the board to update
+      required: true
+      schema:
+        type: integer
+        format: int64
   schemas:
+    BoardCreate:
+      type: object
+      properties:
+        name:
+          type: string
+      required: 
+        - name
     Board:
+      allOf:
+        - $ref: '#/components/schemas/BoardCreate'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+          required: 
+            - id
+    ColumnCreate:
+      type: object
+      properties:
+        name:
+          type: string
+      required: 
+        - name
+    Column:
+      allOf:
+        - $ref: '#/components/schemas/ColumnCreate'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            position:
+              type: integer
+              format: int32
+    TaskCreate:
+      type: object
+      properties:
+        name:
+          type: string
+        color:
+          type: string
+          pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+    Task:
+      allOf:
+        - $ref: '#/components/schemas/TaskCreate'
+        - type: object
+          properties:
+            id:
+              type: integer
+              format: int64
+            status:
+              $ref: '#/components/schemas/TaskStatus'
+            column:
+              $ref: '#/components/schemas/Column'
+            position:
+              type: integer
+              format: int32
+    TaskStatus:
       type: object
       properties:
         id:
