@@ -11,6 +11,7 @@ tags:
 - name: board
 - name: column
 - name: task
+- name: taskStatus
 paths:
   /boards:
     get:
@@ -120,12 +121,284 @@ paths:
         404:
           description: Board not found
           content: {}
+  /columns:
+    get:
+      tags:
+        - column
+      summary: Get all existing column
+      operationId: getColumns
+      parameters: 
+        - name: boardId
+          in: query
+          description: boardId of the column to filter
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Column'
+        400:
+          description: Invalid status value
+          content: {} 
+    post:
+      tags: 
+        - column
+      summary: Create a column
+      operationId: createColumn
+      requestBody:
+        description: Column object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ColumnCreate'
+      responses:
+        201:
+          description: Column created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        400:
+          description: Bad request
+          content:
+            {}
+  /columns/{columnId}:
+    put:
+      tags:
+        - column
+      summary: Update a column
+      operationId: updateColumn
+      parameters: 
+        - $ref: '#/components/parameters/ColumnIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Column not found
+          content: {}
+    delete:
+      tags:
+        - column
+      summary: Delete a column
+      operationId: deleteColumn
+      parameters: 
+        - $ref: '#/components/parameters/ColumnIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Column'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Column not found
+          content: {}
+  /tasks:
+    get:
+      tags:
+        - task
+      summary: Get all existing tasks
+      operationId: getTasks
+      parameters: 
+        - name: columnId
+          in: query
+          description: columnId of the task to filter
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid status value
+          content: {} 
+    post:
+      tags: 
+        - task
+      summary: Create a task
+      operationId: createTask
+      requestBody:
+        description: Task object
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TaskCreate'
+      responses:
+        201:
+          description: Task created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Bad request
+          content:
+            {}
+  /tasks/{taskId}:
+    get:
+      tags: 
+        - task
+      summary: Get a task by Id
+      operationId: getTaskById
+      parameters:
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Task not found
+          content: {}
+    put:
+      tags:
+        - task
+      summary: Update a task
+      operationId: updateTask
+      parameters: 
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Task not found
+          content: {}
+    delete:
+      tags:
+        - task
+      summary: Delete a task
+      operationId: deleteTask
+      parameters: 
+        - $ref: '#/components/parameters/TaskIdParam'
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid ID supplied
+          content: {}
+        404:
+          description: Task not found
+          content: {}
+  /tasks/positions/{columnId}:
+    post:
+      tags: 
+        - task
+      summary: update all task positions for a column
+      description: if a task is missing in this request it will be setted at the last position
+      operationId: setPositions
+      parameters: 
+         - $ref: '#/components/parameters/ColumnIdParam'
+      requestBody:
+        description: tasks to update
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                title: TaskWithPosition
+                type: object
+                properties:
+                  id:
+                    type: integer
+                    format: int64
+                  position:
+                    type: integer
+                    format: int32
+                required: 
+                  - id
+                  - position
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Task'
+        400:
+          description: Invalid status value
+          content: {}
+  /task-status:
+    get:
+      tags:
+        - taskStatus
+      summary: Get all existing task status
+      operationId: getTaskStatus
+      responses:
+        200:
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/TaskStatus'
+        400:
+          description: Invalid status value
+          content: {} 
 components:
   parameters:
     BoardIdParam:
       name: boardId
       in: path
-      description: id of the board to update
+      description: id of the board
+      required: true
+      schema:
+        type: integer
+        format: int64
+    ColumnIdParam:
+      name: columnId
+      in: path
+      description: id of the column
+      required: true
+      schema:
+        type: integer
+        format: int64
+    TaskIdParam:
+      name: taskId
+      in: path
+      description: id of the task
       required: true
       schema:
         type: integer
@@ -153,6 +426,9 @@ components:
       properties:
         name:
           type: string
+        color:
+          type: string
+          pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
       required: 
         - name
     Column:
@@ -166,6 +442,9 @@ components:
             position:
               type: integer
               format: int32
+          required:
+            - id
+            - position
     TaskCreate:
       type: object
       properties:
@@ -174,6 +453,8 @@ components:
         color:
           type: string
           pattern: '^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$'
+      required:
+        - name
     Task:
       allOf:
         - $ref: '#/components/schemas/TaskCreate'
@@ -189,6 +470,11 @@ components:
             position:
               type: integer
               format: int32
+          required:
+            - id
+            - column
+            - status
+            - position
     TaskStatus:
       type: object
       properties:
@@ -197,3 +483,6 @@ components:
           format: int64
         name:
           type: string
+      required: 
+        - id
+        - name
