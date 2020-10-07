@@ -21,7 +21,7 @@ jobs:
     steps:
     # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
     - uses: actions/checkout@v2
-        
+    - uses: actions/upload-     
     # Check the api file definition
     - name: Validate Swagger and OpenAPI using Swagger CLI
       id: validate_api
@@ -32,4 +32,25 @@ jobs:
           api.yaml
     - name: Check if is valid
       if: contains(steps.validate_api.outputs , 'is valid')
-      run: echo Valid api definition      
+      run: echo Valid api definition
+    - name: Generate java
+      uses: ducksify/swagger-codegen-action@v3.0
+      id: generate_java
+      with:
+        files: 
+          api.yaml
+        args: generate -i api.yaml -l spring -o /temp/spring
+    - name: Compile java
+      id: compile_java
+      run: mvn -f /temp/spring/pom.xml clean package
+    - uses: actions/upload-artifact@v2
+      with:
+        name: tasker-spring
+        path: /temp/spring/target/
+    - name: Generate angular
+      uses: ducksify/swagger-codegen-action@v3.0
+      id: generate_angular
+      with:
+        files: 
+          api.yaml
+        args: generate -i api.yaml -l typescript-angular -o /temp/typescript-angular
